@@ -28,6 +28,7 @@ io.on('connection', function(socket){
             }
         }
     } while(isUnique === false)
+    uniqueName = '<span style=color: black>' + uniqueName + '</span>';
     socket.nickname = uniqueName;
     socket.emit('new user', uniqueName);
 
@@ -38,13 +39,22 @@ io.on('connection', function(socket){
 
     socket.on('chat message', function(data){
         if(data.msg.includes('/nickcolor')) {
-            // var mssg = data.msg;
-            // mssg = mssg.split(" ")[1]; //unsafe if client message isnt perfect
-            // newNick = '<span style=color:' + mssg + '>' + data.name + '</span>';
+            var mssg = data.msg;
+            mssg = mssg.split(" ")[1]; //unsafe if client message isnt perfect
+            newNick = '<span style=color:' + mssg + '>' + data.name + '</span>';
+            usersArr.splice( usersArr.indexOf(socket.nickname), 1 );
+            socket.nickname = newNick;
+            usersArr.push(newNick);
+            io.emit('update userlist', usersArr);
+            socket.emit('new color', newNick);
         }
         else if(data.msg.includes('/nick')) {
             var mssg = data.msg;
             mssg = mssg.split(" ")[1]; //unsafe if client message isnt perfect
+            var color = data.name;
+            color = color.split(":")[1];
+            color = color.split("\"")[0];
+            mssg = '<span style=color:' + color + '>' + mssg + '</span>';
             var alreadyExists = false;
             for(var i=0; i<usersArr.length; i++) {
                 if(mssg === usersArr[i]) {

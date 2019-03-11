@@ -44,7 +44,7 @@
             var socket = io();
             $('form').submit(function(e){
                 e.preventDefault(); // prevents page reloading
-                socket.emit('chat message', {msg: $('#textField').val(), name: $('#selfIdentify').text()});
+                socket.emit('chat message', {msg: $('#textField').val(), name: $('#selfIdentify').html()});
                 $('#textField').val('');
                 return false;
             });
@@ -57,6 +57,9 @@
             socket.on('new user', function(name) {
                 $('#selfIdentify').html(name);
                 $('#userList').append($('<li>').html(name));
+            });
+            socket.on('new color', function(name) {
+                $('#selfIdentify').html(name);
             });
             socket.on('update userlist', function(userArr) {
                 $('#userList').empty();

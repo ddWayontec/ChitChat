@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <title>Chat</title>
+</head>
+<body>
+    <div class="main">
+        <div class="titleDiv">
+            <h1>Chit Chat</h1>
+        </div>
+        <div class="usersDiv">
+            <h3>You are: <div id="selfIdentify"></div></h3>
+            <h3 id="activeIdentify">Online: 0</h3>
+            <div class="activeUsers">
+                <ul id="userList">
+
+                </ul>
+            </div>
+        </div>
+        <div class="messagesDiv">
+            <div class="messageContent">
+                <ul id="messageList">
+
+                </ul>
+            </div>
+        </div>
+        <div class="interactiveDiv">
+            <form>
+                <div class="textFieldWrapper">
+                    <input id="textField" autocomplete="off" placeholder="Enter message here..." />
+                </div>
+                <div class="buttonWrapper">
+                    <button id="sendButton">Send</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+        $(function () {
+            var socket = io();
+            $('form').submit(function(e){
+                e.preventDefault(); // prevents page reloading
+                socket.emit('chat message', {msg: $('#textField').val(), name: $('#selfIdentify').text()});
+                $('#textField').val('');
+                return false;
+            });
+            socket.on('chat message', function(msg){
+                $('#messageList').append($('<li>').html(msg));
+            });
+            socket.on('update users', function(num) {
+               $('#activeIdentify').html('Online: '+num);
+            });
+            socket.on('new user', function(name) {
+                $('#selfIdentify').html(name);
+                $('#userList').append($('<li>').html(name));
+            });
+            socket.on('update userlist', function(userArr) {
+                $('#userList').empty();
+                for(var i=0; i<userArr.length; i++) {
+                    $('#userList').append($('<li>').html(userArr[i]));
+                }
+            });
+            socket.on('update messagelist', function(messageArr) {
+                $('#messageList').empty();
+                for(var i=0; i<messageArr.length; i++) {
+                    $('#messageList').append($('<li>').html(messageArr[i]));
+                }
+            });
+            socket.on('disconnect', function(userArr) {
+                $('#userList').empty();
+                for(var i=0; i<userArr.length; i++) {
+                    $('#userList').append($('<li>').html(userArr[i]));
+                }
+
+            });
+        });
+    </script>
+</body>
+</html>
